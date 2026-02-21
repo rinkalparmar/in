@@ -39,6 +39,8 @@ function Users1() {
     gender?: string;
   }>({});
 
+  const [searchItem, setSearchItem] = useState("");
+
   const store = useSelector((state: any) => state.user.myUsers);
 
   const [edit, setEdit] = useState<string | null>(null);
@@ -146,6 +148,15 @@ function Users1() {
     <>
       {store && (
         <>
+          <div className="flex max-w-xl m-auto">
+            <input
+              type="search"
+              name="searchItem"
+              className="w-full rounded border p-2"
+              value={searchItem}
+              onChange={(e) => setSearchItem(e.target.value)}
+            />
+          </div>
           <div className="flex justify-end">
             <button
               className="flex py-3 px-3 bg-blue-500 text-white justify-end mt-10 ml-50"
@@ -180,32 +191,48 @@ function Users1() {
                   Action
                 </td>
               </tr>
-              {store.map((user: User) => (
-                <tr key={user.id}>
-                  <td className="p-2 border">{user.id}</td>
-                  <td className="p-2 border">{user.name}</td>
-                  <td className="p-2 border">{user.email}</td>
-                  <td className="p-2 border">{user.address}</td>
-                  <td className="p-2 border">{user.mobile}</td>
-                  <td className="p-2 border">{user.gender}</td>
-                  <td className="p-2 border">
-                    <button
-                      className="bg-green-600 py-1 px-2 rounded-lg text-white"
-                      onClick={() => handleUpdate(user)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td className="p-2 border">
-                    <button
-                      className="bg-red-600 py-1 px-2 rounded-lg text-white"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {store
+                .filter((s: User) => {
+                  const matchElement =
+                    s.name.toLowerCase().includes(searchItem.toLowerCase()) ||
+                    s.email.toLowerCase().includes(searchItem.toLowerCase()) ||
+                    s.address
+                      .toLowerCase()
+                      .includes(searchItem.toLowerCase()) ||
+                    s.address
+                      .toLowerCase()
+                      .includes(searchItem.toLowerCase()) ||
+                    s.mobile.includes(searchItem) ||
+                    s.gender.toLowerCase().includes(searchItem.toLowerCase());
+
+                  return matchElement;
+                })
+                .map((user: User) => (
+                  <tr key={user.id}>
+                    <td className="p-2 border">{user.id}</td>
+                    <td className="p-2 border">{user.name}</td>
+                    <td className="p-2 border">{user.email}</td>
+                    <td className="p-2 border">{user.address}</td>
+                    <td className="p-2 border">{user.mobile}</td>
+                    <td className="p-2 border">{user.gender}</td>
+                    <td className="p-2 border">
+                      <button
+                        className="bg-green-600 py-1 px-2 rounded-lg text-white"
+                        onClick={() => handleUpdate(user)}
+                      >
+                        Edit
+                      </button>
+                    </td>
+                    <td className="p-2 border">
+                      <button
+                        className="bg-red-600 py-1 px-2 rounded-lg text-white"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </table>
           </div>
         </>
