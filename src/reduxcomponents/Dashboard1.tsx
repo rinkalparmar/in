@@ -1,7 +1,7 @@
 import React from "react";
 
 function Dashboard1() {
-  const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const currentUser = JSON.parse(localStorage.getItem("currentUser1") || "{}");
 
   const isAdmin = currentUser?.role === "admin";
 

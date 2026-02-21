@@ -5,12 +5,12 @@ export default function Sidebar1() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const currentUser = JSON.parse(localStorage.getItem("currentUser1") || "{}");
 
   const isADMIN = currentUser?.role === "admin";
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
+    localStorage.removeItem("currentUser1");
     navigate("/");
   };
 

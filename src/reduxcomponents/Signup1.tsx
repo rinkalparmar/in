@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { signup } from "../redux/authSlice";
 
 function Signup1() {
   const [data, setData] = useState({
@@ -15,6 +17,11 @@ function Signup1() {
   });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { error: reduxError, isSignup } = useSelector(
+    (state: any) => state.auth,
+  );
 
   const [error, setError] = useState<{
     name?: string;
@@ -123,32 +130,14 @@ function Signup1() {
 
     if (!validation()) return;
 
-    const existUsers = JSON.parse(localStorage.getItem("users") || "[]");
-
-    const userLenght = existUsers?.length ? existUsers?.length + 1 : 1;
-
-    const newUser = {
-      id: userLenght,
-      ...data,
-    };
-
-    existUsers.push(newUser);
-
-    localStorage.setItem("users", JSON.stringify(existUsers));
-    navigate("/");
-
-    setData({
-      name: "",
-      email: "",
-      address: "",
-      mobile: "",
-      gender: "",
-      city: "",
-      hobbies: [],
-      password: "",
-      role: "",
-    });
+    dispatch(signup(data));
   };
+
+  useEffect(() => {
+    if (isSignup) {
+      navigate("/");
+    }
+  }, [isSignup, navigate]);
 
   return (
     <div className="max-w-2xl m-auto bg-white shadow-lg rounded p-6 mt-10">
@@ -290,6 +279,7 @@ function Signup1() {
             Login
           </Link>
         </div>
+        {reduxError && <p style={{ color: "red" }}>{reduxError}</p>}
         <div className="flex justify-center">
           <button className="bg-green-500 font-bold text-base py-2 px-8 rounded-lg">
             Signup

@@ -1,4 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createUser,
+  deleteUser,
+  getUsers,
+  updateUser,
+} from "../redux/userSlice";
 
 interface User {
   id: string;
@@ -18,6 +25,10 @@ function Users1() {
     gender: "",
   });
 
+  const dispatch = useDispatch();
+
+  const { error: reduxError } = useSelector((state: any) => state.user);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const [error, setError] = useState<{
@@ -28,7 +39,7 @@ function Users1() {
     gender?: string;
   }>({});
 
-  const [store, setStore] = useState<User[]>([]);
+  const store = useSelector((state: any) => state.user.myUsers);
 
   const [edit, setEdit] = useState<string | null>(null);
 
@@ -85,60 +96,45 @@ function Users1() {
     setError({ ...error, [name]: "" });
   };
 
+  useEffect(() => {
+    dispatch(getUsers());
+  }, [dispatch]);
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
     if (!validation()) return;
 
     if (edit) {
-      if (!edit) return;
-      const update = store.map((u) => (u.id === edit ? { ...u, ...data } : u));
-      localStorage.setItem("myUsers", JSON.stringify(update));
-      setStore(update);
+      dispatch(updateUser({ id: edit, ...data }));
+      setEdit(null);
+      setIsFormOpen(false);
     } else {
-      const existUsers = JSON.parse(localStorage.getItem("myUsers") || "[]");
-
-      const userLenght = existUsers?.length ? existUsers?.length + 1 : 1;
-
-      const newUser = {
-        id: userLenght,
-        ...data,
-      };
-
-      existUsers.push(newUser);
-
-      localStorage.setItem("myUsers", JSON.stringify(existUsers));
-
-      setStore(existUsers);
+      dispatch(createUser(data));
+      setIsFormOpen(false);
+      setData({
+        name: "",
+        email: "",
+        address: "",
+        mobile: "",
+        gender: "",
+      });
     }
-
-    setData({
-      name: "",
-      email: "",
-      address: "",
-      mobile: "",
-      gender: "",
-    });
   };
-
-  useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("myUsers") || "[]");
-    if (users) {
-      setStore(users);
-    }
-  }, []);
 
   const handleDelete = (id: string) => {
-    const user = store.filter((u) => u.id !== id);
-    localStorage.setItem("myUsers", JSON.stringify(user));
-    setStore(user);
+    dispatch(deleteUser(id));
   };
 
-  const handleUpdate = (id: string) => {
-    const user = store.find((u) => u.id === id);
-    if (!user) return;
-    setData(user);
-    setEdit(id);
+  const handleUpdate = (user: User) => {
+    setData({
+      name: user.name,
+      email: user.email,
+      address: user.address,
+      mobile: user.mobile,
+      gender: user.gender,
+    });
+    setEdit(user.id);
     setIsFormOpen(true);
   };
 
@@ -184,7 +180,7 @@ function Users1() {
                   Action
                 </td>
               </tr>
-              {store.map((user) => (
+              {store.map((user: User) => (
                 <tr key={user.id}>
                   <td className="p-2 border">{user.id}</td>
                   <td className="p-2 border">{user.name}</td>
@@ -195,7 +191,7 @@ function Users1() {
                   <td className="p-2 border">
                     <button
                       className="bg-green-600 py-1 px-2 rounded-lg text-white"
-                      onClick={() => handleUpdate(user.id)}
+                      onClick={() => handleUpdate(user)}
                     >
                       Edit
                     </button>
@@ -214,6 +210,7 @@ function Users1() {
           </div>
         </>
       )}
+      {reduxError && <p className="text-red-500">{reduxError}</p>}
       {isFormOpen && (
         <div className="max-w-2xl m-auto bg-white shadow-lg rounded p-6 mt-10">
           <h1 className="font-bold text-xl text-center">Add Members</h1>

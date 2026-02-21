@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { login } from "../redux/authSlice";
 
 function Login1() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { error: reduxError, isAuthenticated } = useSelector(
+    (state: any) => state.auth,
+  );
+
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -43,26 +51,15 @@ function Login1() {
 
     if (!validation()) return;
 
-    const existUser = JSON.parse(localStorage.getItem("users") || "[]");
+    dispatch(login(data));
+  };
 
-    const user = existUser.find(
-      (user: any) =>
-        user.email === data.email && user.password === data.password,
-    );
-
-    if (!user) {
-      alert("user not found");
-    } else {
-      alert("Login sucessfully");
-      localStorage.setItem("currentUser", JSON.stringify(user));
+  useEffect(() => {
+    if (isAuthenticated) {
       navigate("/dashboard");
     }
+  }, [isAuthenticated, navigate]);
 
-    setData({
-      email: "",
-      password: "",
-    });
-  };
   const handleInput = (e: any) => {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
@@ -99,6 +96,7 @@ function Login1() {
             signup
           </Link>
         </div>
+        {reduxError && <p style={{ color: "red" }}>{reduxError}</p>}
         <div className="flex justify-center">
           <button className="bg-green-500 font-bold text-base py-2 px-8 rounded-lg">
             Login
