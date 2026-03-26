@@ -36,31 +36,35 @@ router.post(
 );
 
 router.get(
-  "/getAllUsers",
-  authMiddleware,
+  "/getAllUser",
+  authenticationMiddleware,
   roleMiddleware(["admin"]),
   async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 5;
+      const limit = parseInt(req.query.limit) || 3;
       const skip = (page - 1) * limit;
-      const total = await Users.countDocuments();
+      const total = await User.countDocuments();
 
-      const find = await Users.find()
+      const sortOrder = req.query.sort === "asc" ? 1 : -1;
+
+      const users = await User.find()
         .skip(skip)
         .limit(limit)
-        .sort({ createdAt: -1 });
-      res
-        .status(200)
-        .json({
-          message: "Get all users",
-          find,
-          page,
-          total,
-          totalPages: Math.ceil(total / limit),
-        });
+        .sort({ sortOrder });
+
+      if (!users) {
+        return res.status(400).json("Users not found");
+      }
+      res.status(200).json({
+        message: "Users get successfully",
+        users,
+        total,
+        page,
+        totalPage: Math.ceil(total / limit),
+      });
     } catch (error) {
-      return res.status(500).json({ message: "Internal server error", error });
+      return res.status(500).json({ message: "internal server error", error });
     }
   },
 );

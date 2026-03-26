@@ -8,6 +8,11 @@ const Users = new mongoose.Schema(
     address: String,
     mobile: { type: String, max: 10 },
     hobbies: [String],
+    //    mobile: {
+    //   type: String,
+    //   unique: true,
+    //   match: [/^[0-9]{10}$/, "Mobile number enter as 10 digits"],
+    // },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Auth" },
   },
   {
